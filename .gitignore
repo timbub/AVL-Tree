@@ -1,0 +1,8 @@
+build/
+Makefile
+*.mk
+*.obuild/
+Makefile
+*.mk
+*.o
+Testing/

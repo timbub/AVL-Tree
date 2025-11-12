@@ -2,28 +2,26 @@
 #include "tree.hpp"
 
 int main() {
+    static constexpr char KEY = 'k';
+    static constexpr char REQUEST = 'q';
 
     char type;
-    int a, b;
+    int first_key, second_key;
 
     using namespace Tree;
     AvlTree<int> tree;
     while (std::cin >> type) {
 
-        if (type == 'k') {
+        if (type == KEY) {
 
-            std::cin >> a;
-            std::cout << a << "\n";
-            tree.insert(a);
+            std::cin >> first_key;
+            tree.insert(first_key);
 
-        } else if (type == 'q') {
-            std::cin >> a >> b;
-            if (b <= a) {
-                std::cout << 0 << "\n";
-            } else {
-                std::cout << "processing\n" ;
-            }
+        } else if (type == REQUEST) {
+            std::cin >> first_key >> second_key;
+            std::cout << tree.count_in_range(first_key, second_key) << " ";
         }
     }
+    std::cout << std::endl;
     return 0;
 }

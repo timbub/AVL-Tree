@@ -7,14 +7,16 @@
 namespace Tree {
     template <typename KeyT>
     class AvlTree {
+    static constexpr int SELF_COUNT = 1;
         struct Node {
             KeyT   key_;
             Node*  left_;
             Node*  right_;
             Node*  parent_;
             int    height_;
-            Node(KeyT key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, size_t height = 0) :
-            key_(key), left_(left), right_(right), parent_(parent), height_(height) {}
+            int    subtree_size_;
+            Node(KeyT key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = 0) :
+            key_(key), left_(left), right_(right), parent_(parent), height_(height), subtree_size_(subtree_size) {}
         };
         struct Node;
     public:
@@ -50,7 +52,7 @@ namespace Tree {
         }
 
         void insert(KeyT key) {
-            Node* new_node = new Node(key, nullptr, nullptr, nullptr, 0);
+            Node* new_node = new Node(key, nullptr, nullptr, nullptr, 0, 0);
             if(root_ == nullptr) {
                 root_ = new_node;
                 return;
@@ -71,14 +73,36 @@ namespace Tree {
             } else {
                 parent->right_ = new_node;
             }
-            std::cout << "insert" << key << "\n";
+            //std::cout << "insert" << key << "\n";
+            //std::cout << "INFO insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
+
+            fix_size(parent);
             Node* unbalanced_node = fix_height(parent);
-            if(unbalanced_node) {
-                std::cout << unbalanced_node->key_ << "balanced\n";
-                unbalanced_node = balance_tree(unbalanced_node);
-            }
+            if(unbalanced_node) unbalanced_node = balance_tree(unbalanced_node);
+            //std::cout << "INFO after fix insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
+
+        }
+        int count_in_range(KeyT left, KeyT right) {
+            if (right <= left) return 0;
+            Node* left_bound  = upper_bound(left);
+            Node* right_bound = upper_bound(right);
+            // (!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
+            // (!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
+
+
+            int upper_count = count_less(right_bound);
+            int lower_count = count_less(left_bound); //delete, only for debug
+            //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";
+            return upper_count - lower_count;
         }
     private:
+
+        int height(Node* node) {
+            return node ? node->height_ : 0;
+        }
+        int size(Node* node) {
+            return node ? node->subtree_size_ : 0;
+        }
         Node* copy_tree(const AvlTree& other) {
             std::stack<std::pair<Node*, Node*>> stack;
 
@@ -131,10 +155,10 @@ namespace Tree {
             Node* current_node = node;
             while (current_node) {
                 int old_height   = current_node->height_;
-                int left_height  = current_node->left_  ? current_node->left_->height_  : 0;
-                int right_height = current_node->right_ ? current_node->right_->height_ : 0;
+                int left_height  = height(current_node->left_);
+                int right_height = height(current_node->right_);
 
-                current_node->height_ = 1 + std::max(left_height, right_height);
+                current_node->height_ = SELF_COUNT + std::max(left_height, right_height);
                 if (std::abs(left_height - right_height) > 1) return current_node;
                 if (current_node->height_ == old_height) break;
                 current_node = current_node->parent_;
@@ -142,9 +166,17 @@ namespace Tree {
             return nullptr;
         }
 
+        void fix_size(Node* node) {
+            Node* current_node = node;
+            while(current_node) {
+                current_node->subtree_size_++;
+                current_node = current_node->parent_;
+            }
+        }
+
         Node* balance_tree(Node* node) {
-            int left_height  = node->left_  ? node->left_->height_  : 0;
-            int right_height = node->right_ ? node->right_->height_ : 0;
+            int left_height  = height(node->left_);
+            int right_height = height(node->right_);
             int balance = left_height - right_height;
             if (balance > 1) {
                 if (left_height < right_height) node->left_->right_ = left_rotate(node->left_->right_);
@@ -157,7 +189,7 @@ namespace Tree {
         }
 
         Node* right_rotate(Node* node) {
-            Node* parent     = node->parent_;
+            Node* parent = node->parent_;
 
             if (!node->left_) return node;
             Node* left_node = node->left_;
@@ -177,6 +209,15 @@ namespace Tree {
             left_node->right_ = node;
             node->parent_     = left_node;
 
+            //update height
+            node->height_ = std::max(height(node->left_), height(node->right_)) + SELF_COUNT;
+            left_node->height_ = std::max(height(left_node->left_), height(left_node->right_)) + SELF_COUNT;
+            fix_height(left_node->parent_);
+            //update size
+            node->subtree_size_ = size(node->left_) + size(node->right_) + SELF_COUNT;
+            left_node->subtree_size_ = size(left_node->left_) + size(left_node->right_) + SELF_COUNT;
+            //fix_size(left_node->parent_);
+
             return left_node;
         }
 
@@ -184,7 +225,7 @@ namespace Tree {
             Node* parent     = node->parent_;
 
             if (!node->right_) return node;
-            Node* right_node = node->right_; // проверка
+            Node* right_node = node->right_;
 
             node->right_ = right_node->left_;
             if (right_node->left_) right_node->left_->parent_ = node;
@@ -201,7 +242,48 @@ namespace Tree {
             right_node->left_ = node;
             node->parent_     = right_node;
 
+            //update height
+            node->height_ = std::max(height(node->left_), height(node->right_)) + SELF_COUNT;
+            right_node->height_ = std::max(height(right_node->left_), height(right_node->right_)) + SELF_COUNT;
+            fix_height(right_node->parent_);
+            //update size
+            node->subtree_size_ = size(node->left_) + size(node->right_) + SELF_COUNT;
+            right_node->subtree_size_ = size(right_node->left_) + size(right_node->right_) + SELF_COUNT;
+            //fix_size(right_node->parent_);
+
             return right_node;
+        }
+
+        Node* upper_bound(KeyT key) {
+            Node* current_node = root_;
+            Node* best_node    = nullptr;
+            while(current_node) {
+                if (current_node->key_ > key) {
+                    best_node    = current_node;
+                    current_node = current_node->left_;
+                } else {
+                    current_node = current_node->right_;
+                }
+            }
+            return best_node;
+        }
+
+        int count_less(Node* node) {
+            //std::cout << "root size: " << size(root_) << "\n";
+            if (!node) return size(root_) + SELF_COUNT;
+            Node* current_node = root_;
+            KeyT key = node->key_;
+            int count = 0;
+            while(current_node) {
+                //std::cout << "key: " << key << "current key: " << current_node->key_ << "\n";
+                if(key > current_node->key_) {
+                    count += SELF_COUNT + size(current_node->left_);
+                    current_node = current_node->right_;
+                } else {
+                    current_node = current_node->left_;
+                }
+            }
+            return count;
         }
     };
 }

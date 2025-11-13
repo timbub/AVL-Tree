@@ -22,6 +22,5 @@ int main() {
             std::cout << tree.count_in_range(first_key, second_key) << " ";
         }
     }
-    std::cout << std::endl;
     return 0;
 }

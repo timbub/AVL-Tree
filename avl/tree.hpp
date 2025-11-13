@@ -15,7 +15,7 @@ namespace Tree {
             Node*  parent_;
             int    height_;
             int    subtree_size_;
-            Node(KeyT key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = 0) :
+            Node(KeyT key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = SELF_COUNT) :
             key_(key), left_(left), right_(right), parent_(parent), height_(height), subtree_size_(subtree_size) {}
         };
         struct Node;
@@ -52,21 +52,25 @@ namespace Tree {
         }
 
         void insert(KeyT key) {
-            Node* new_node = new Node(key, nullptr, nullptr, nullptr, 0, 0);
-            if(root_ == nullptr) {
-                root_ = new_node;
-                return;
-            }
             Node* current_node = root_;
             Node* parent       = nullptr;
             while (current_node) {
                 parent = current_node;
                 if (key < current_node->key_) {
                     current_node = current_node->left_;
-                } else if (key >= current_node->key_) {
+                } else if (key > current_node->key_) {
                     current_node = current_node->right_;
+                } else {
+                    return;
                 }
             }
+
+            Node* new_node = new Node(key, nullptr, nullptr, nullptr, 0, SELF_COUNT);
+            if(root_ == nullptr) {
+                root_ = new_node;
+                return;
+            }
+
             new_node->parent_ = parent;
             if (key < parent->key_) {
                 parent->left_ = new_node;
@@ -86,12 +90,12 @@ namespace Tree {
             if (right <= left) return 0;
             Node* left_bound  = upper_bound(left);
             Node* right_bound = upper_bound(right);
-            // (!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
-            // (!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
+            //(!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
+            //(!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
 
 
             int upper_count = count_less(right_bound);
-            int lower_count = count_less(left_bound); //delete, only for debug
+            int lower_count = count_less(left_bound);
             //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";
             return upper_count - lower_count;
         }
@@ -101,12 +105,13 @@ namespace Tree {
             return node ? node->height_ : 0;
         }
         int size(Node* node) {
+            //if (!node) std::cout << "node is nullptr\n";
             return node ? node->subtree_size_ : 0;
         }
         Node* copy_tree(const AvlTree& other) {
             std::stack<std::pair<Node*, Node*>> stack;
 
-            Node* new_root = new Node(other.root->key, nullptr, nullptr, other.root->parent, other.root->height);
+            Node* new_root = new Node(other.root->key, nullptr, nullptr, other.root->parent, other.root->height, other.root->subtree_size_);
             Node* old_node = other.root;
 
             stack.push({old_node, new_root});
@@ -116,11 +121,11 @@ namespace Tree {
                 stack.pop();
 
                 if (old_node->left_) {
-                    new_node->left_ = new Node(old_node->left_->key, nullptr, nullptr, new_node, old_node->left_->height);
+                    new_node->left_ = new Node(old_node->left_->key, nullptr, nullptr, new_node, old_node->left_->height, old_node->left_->subtree_size_);
                     stack.push({old_node->left_, new_node->left_});
                 }
                 if (old_node->right_) {
-                    new_node->right_ = new Node(old_node->right_->key, nullptr, nullptr, new_node, old_node->right_->height);
+                    new_node->right_ = new Node(old_node->right_->key, nullptr, nullptr, new_node, old_node->right_->height, old_node->right_->subtree_size_);
                     stack.push({old_node->right_, new_node->right_});
                 }
             }
@@ -216,7 +221,6 @@ namespace Tree {
             //update size
             node->subtree_size_ = size(node->left_) + size(node->right_) + SELF_COUNT;
             left_node->subtree_size_ = size(left_node->left_) + size(left_node->right_) + SELF_COUNT;
-            //fix_size(left_node->parent_);
 
             return left_node;
         }
@@ -249,7 +253,6 @@ namespace Tree {
             //update size
             node->subtree_size_ = size(node->left_) + size(node->right_) + SELF_COUNT;
             right_node->subtree_size_ = size(right_node->left_) + size(right_node->right_) + SELF_COUNT;
-            //fix_size(right_node->parent_);
 
             return right_node;
         }
@@ -270,14 +273,16 @@ namespace Tree {
 
         int count_less(Node* node) {
             //std::cout << "root size: " << size(root_) << "\n";
-            if (!node) return size(root_) + SELF_COUNT;
+            if (!node) return size(root_);
             Node* current_node = root_;
             KeyT key = node->key_;
             int count = 0;
             while(current_node) {
                 //std::cout << "key: " << key << "current key: " << current_node->key_ << "\n";
                 if(key > current_node->key_) {
-                    count += SELF_COUNT + size(current_node->left_);
+                    //std::cout << "size currrent node: " << size(current_node->left_);
+                    count += size(current_node->left_) + SELF_COUNT;
+                    //std::cout << "count = " << count << "\n";
                     current_node = current_node->right_;
                 } else {
                     current_node = current_node->left_;

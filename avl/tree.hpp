@@ -51,7 +51,7 @@ namespace Tree {
             delete_tree();
         }
 
-        void insert(KeyT key) {
+        void insert(KeyT& key) {
             Node* current_node = root_;
             Node* parent       = nullptr;
             while (current_node) {
@@ -86,7 +86,7 @@ namespace Tree {
             //std::cout << "INFO after fix insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
         }
 
-        int range_required(KeyT left, KeyT right) {
+        int range_required(KeyT& left, KeyT& right) {
             if (right <= left) return 0;
             Node* left_bound  = upper_bound(left);
             Node* right_bound = upper_bound(right);
@@ -255,7 +255,7 @@ namespace Tree {
             return right_node;
         }
 
-        Node* upper_bound(KeyT key) {
+        Node* upper_bound(KeyT& key) {
             Node* current_node = root_;
             Node* best_node    = nullptr;
             while(current_node) {

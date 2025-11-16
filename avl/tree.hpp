@@ -84,16 +84,14 @@ namespace Tree {
             Node* unbalanced_node = fix_height(parent);
             if(unbalanced_node) unbalanced_node = balance_tree(unbalanced_node);
             //std::cout << "INFO after fix insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
-
         }
-        int count_in_range(KeyT left, KeyT right) {
+
+        int range_required(KeyT left, KeyT right) {
             if (right <= left) return 0;
             Node* left_bound  = upper_bound(left);
             Node* right_bound = upper_bound(right);
             //(!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
             //(!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
-
-
             int upper_count = count_less(right_bound);
             int lower_count = count_less(left_bound);
             //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";

@@ -19,8 +19,9 @@ int main() {
 
         } else if (type == REQUEST) {
             std::cin >> first_key >> second_key;
-            std::cout << tree.count_in_range(first_key, second_key) << " ";
+            std::cout << tree.range_required(first_key, second_key) << " ";
         }
     }
+    std::cout << "\n";
     return 0;
 }

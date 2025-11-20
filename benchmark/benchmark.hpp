@@ -23,7 +23,7 @@ namespace benchmark {
     template <typename TreeType>
     long long run_benchmark(TreeType& tree, const std::vector<Operation> ops) {
         using Clock = std::chrono::high_resolution_clock;
-        using Ns    = std::chrono::nanoseconds;
+        using Ns    = std::chrono::microseconds;
 
         char type;
         int first_key, second_key;

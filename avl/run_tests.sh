@@ -1,5 +1,5 @@
 #!/bin/bash
-PROGRAM="./build/tree"
+PROGRAM="./build/avl"
 
 TESTS_DIR="./tests"
 

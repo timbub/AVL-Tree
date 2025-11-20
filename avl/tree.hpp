@@ -15,25 +15,25 @@ namespace Tree {
             Node*  parent_;
             int    height_;
             int    subtree_size_;
-            Node(KeyT key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = SELF_COUNT) :
+            Node(const KeyT& key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = SELF_COUNT) :
             key_(key), left_(left), right_(right), parent_(parent), height_(height), subtree_size_(subtree_size) {}
         };
         struct Node;
     public:
         Node* root_;
-        AvlTree() {} //constructor
+        AvlTree() : root_(nullptr) {} //constructor
 
         AvlTree(const AvlTree<KeyT>& other) { //copy constructor
             root_ = copy_tree(other);
         }
 
-        AvlTree(const AvlTree<KeyT>&& other) noexcept : root_(other.root_) { //move constructor
+        AvlTree(AvlTree<KeyT>&& other) noexcept : root_(other.root_) { //move constructor
             other.root_ = nullptr;
         }
 
         AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept { //move assigment
             if (&other == this) return *this;
-            delete root_;
+            delete_tree(root_);
             root_       = other.root_;
             other.root_ = nullptr;
             return *this;
@@ -51,7 +51,7 @@ namespace Tree {
             delete_tree();
         }
 
-        void insert(KeyT& key) {
+        void insert(const KeyT& key) {
             Node* current_node = root_;
             Node* parent       = nullptr;
             while (current_node) {

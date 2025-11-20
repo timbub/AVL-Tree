@@ -16,13 +16,12 @@ int main() {
     while (std::cin >> type) {
 
         if (type == KEY) {
-
             std::cin >> first_key;
             tree.insert(first_key);
 
         } else if (type == REQUEST) {
             std::cin >> first_key >> second_key;
-            std::cout << range_required(tree, first_key, second_key) << " ";
+            std::cout << range_required(first_key, second_key) << " ";
         }
     }
     std::cout << "\n";

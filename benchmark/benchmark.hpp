@@ -25,9 +25,6 @@ namespace benchmark {
         using Clock = std::chrono::high_resolution_clock;
         using Ns    = std::chrono::microseconds;
 
-        char type;
-        int first_key, second_key;
-
         long long total_time = 0;
         for (const auto& op: ops) {
             if (op.type == KEY) {
@@ -37,7 +34,7 @@ namespace benchmark {
                 total_time += std::chrono::duration_cast<Ns>(end - start).count();
             } else if (op.type == REQUEST) {
                 auto start = Clock::now();
-                size_t distance = perform_query(tree, first_key, second_key);
+                volatile size_t distance = perform_query(tree, op.first, op.second);
                 auto end = Clock::now();
                 total_time += std::chrono::duration_cast<Ns>(end - start).count();
             }

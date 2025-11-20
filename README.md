@@ -29,7 +29,7 @@ I also implemented it using std::set and compared their performance.
 #### Clone repository
 ```
 git clone ...
-cd tree
+cd AVL-Tree
 ```
 [TYPE] = avl | set | benchmark
 

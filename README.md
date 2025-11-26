@@ -33,7 +33,7 @@ TYPE = avl | set | benchmark
 ```
 git clone ...
 cd AVL-Tree
-
+```
 #### Build
 ```
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
@@ -44,4 +44,3 @@ cmake --build build
 cd build/[TYPE]
 ./[TYPE]
 ```
-

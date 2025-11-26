@@ -15,6 +15,7 @@ namespace benchmark {
 
     template <typename KeyT, typename SetTree>
     size_t perform_query(SetTree& tree, KeyT left, KeyT right) {
+        if (left > right) return 0;
         auto left_bound  = tree.upper_bound(left);
         auto right_bound = tree.upper_bound(right);
         return std::distance(left_bound, right_bound);

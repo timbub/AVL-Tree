@@ -18,7 +18,6 @@ namespace Tree {
             Node(const KeyT& key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = SELF_COUNT) :
             key_(key), left_(left), right_(right), parent_(parent), height_(height), subtree_size_(subtree_size) {}
         };
-        struct Node;
     public:
         Node* root_;
         AvlTree() : root_(nullptr) {} //constructor

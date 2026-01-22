@@ -6,15 +6,15 @@
 tree
 ├── CMakeLists.txt
 ├── avl
-|   ├── tests
-|   |   ├── test_1.in
-|   |   ├── test_1.out
-|   |   ├── ...
-|   |   ├── ...
 │   ├── run_tests.sh
 │   ├── CMakeLists.txt
 │   ├── tree.hpp
 │   └── main.cpp
+├── tests
+|   ├── test_1.in
+|   ├── test_1.out
+|   ├── ...
+│   └── ...
 ├── benchmark
 |   ├── main.cpp
 │   ├── CMakeLists.txt

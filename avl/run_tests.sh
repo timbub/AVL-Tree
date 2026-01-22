@@ -1,7 +1,7 @@
 #!/bin/bash
 PROGRAM="./build/avl"
 
-TESTS_DIR="./tests"
+TESTS_DIR="../tests"
 
 echo "running E2E tests"
 for INPUT_FILE in ${TESTS_DIR}/*.in; do

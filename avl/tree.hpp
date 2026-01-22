@@ -108,8 +108,8 @@ namespace Tree {
         Node* copy_tree(const AvlTree& other) {
             std::stack<std::pair<Node*, Node*>> stack;
 
-            Node* new_root = new Node(other.root->key, nullptr, nullptr, other.root->parent, other.root->height, other.root->subtree_size_);
-            Node* old_node = other.root;
+            Node* new_root = new Node(other.root_->key, nullptr, nullptr, other.root_->parent, other.root_->height, other.root_->subtree_size_);
+            Node* old_node = other.root_;
 
             stack.push({old_node, new_root});
             while (!stack.empty()) {

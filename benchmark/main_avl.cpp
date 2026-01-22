@@ -1,13 +1,11 @@
 #include <iostream>
 #include "../avl/tree.hpp"
 #include "benchmark.hpp"
-#include <set>
 #include <vector>
 
 
 int main(int argc, char* argv[]) {
     std::vector<benchmark::Operation> operations;
-    std::set<int> set;
     Tree::AvlTree<int> avl;
     char type;
 
@@ -23,10 +21,7 @@ int main(int argc, char* argv[]) {
     }
 
     long long avl_time = benchmark::run_benchmark(avl, operations);
-    long long set_time = benchmark::run_benchmark(set, operations);
-
-    std::cout << "set: " << set_time << "ms\n ";
-    std::cout << "avl: " << avl_time << "ms\n";
-
+    std::cout << "avl: " << avl_time << "us\n";
+ 
     return 0;
 }

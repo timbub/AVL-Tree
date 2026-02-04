@@ -39,8 +39,13 @@ cd AVL-Tree
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
 cmake --build build
 ```
-#### Run
+#### Run avl or set
 ```
-cd build/[TYPE]
-./[TYPE]
+cd build/[avl/set]
+./[avl/set]
+```
+#### Run Benchmark
+```
+cd build/benchmark
+./[b_avl/b_set]
 ```

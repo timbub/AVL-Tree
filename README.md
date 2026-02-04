@@ -28,7 +28,6 @@ In this project, I implemented my own AVL tree and a method that allows me to qu
 I also implemented it using std::set and compared their performance.
 
 ### Run
-TYPE = avl | set | benchmark
 #### Clone repository
 ```
 git clone ...

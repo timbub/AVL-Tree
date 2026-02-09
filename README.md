@@ -28,7 +28,6 @@ In this project, I implemented my own AVL tree and a method that allows me to qu
 I also implemented it using std::set and compared their performance.
 
 ### Run
-TYPE = avl | set | benchmark
 #### Clone repository
 ```
 git clone ...
@@ -39,8 +38,13 @@ cd AVL-Tree
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
 cmake --build build
 ```
-#### Run
+#### Run avl or set
 ```
-cd build/[TYPE]
-./[TYPE]
+cd build/[avl/set]
+./[avl/set]
+```
+#### Run Benchmark
+```
+cd build/benchmark
+./[b_avl/b_set]
 ```

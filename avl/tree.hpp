@@ -84,18 +84,7 @@ namespace Tree {
             if(unbalanced_node) unbalanced_node = balance_tree(unbalanced_node);
             //std::cout << "INFO after fix insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
         }
-
-        int range_required(KeyT& left, KeyT& right) {
-            if (right <= left) return 0;
-            Node* left_bound  = upper_bound(left);
-            Node* right_bound = upper_bound(right);
-            //(!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
-            //(!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
-            int upper_count = count_less(right_bound);
-            int lower_count = count_less(left_bound);
-            //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";
-            return upper_count - lower_count;
-        }
+        
     private:
 
         int height(Node* node) {
@@ -126,7 +115,6 @@ namespace Tree {
                     stack.push({old_node->right_, new_node->right_});
                 }
             }
-
             return new_root;
         }
         void delete_tree() {
@@ -254,11 +242,13 @@ namespace Tree {
             return right_node;
         }
 
-        Node* upper_bound(KeyT& key) {
+        private:
+        template <typename Comparator>
+        Node* find_bound(KeyT& key, Comparator comp) {
             Node* current_node = root_;
             Node* best_node    = nullptr;
             while(current_node) {
-                if (current_node->key_ > key) {
+                if (comp(current_node->key_,key)) {
                     best_node    = current_node;
                     current_node = current_node->left_;
                 } else {
@@ -268,6 +258,18 @@ namespace Tree {
             return best_node;
         }
 
+        Node* upper_bound(KeyT& key) {
+        return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
+            return key1 > key2;
+        });   
+        }
+
+        Node* lower_bound(KeyT& key) {
+        return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
+            return key1 >= key2;
+        }); 
+        }
+        
         int count_less(Node* node) {
             //std::cout << "root size: " << size(root_) << "\n";
             if (!node) return size(root_);
@@ -287,5 +289,18 @@ namespace Tree {
             }
             return count;
         }
+
+    public:
+        int range_required(KeyT& left, KeyT& right) {
+            if (right < left) return 0;
+            Node* left_bound  = lower_bound(left);
+            Node* right_bound = upper_bound(right);
+            //(!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
+            //(!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
+            int upper_count = count_less(right_bound);
+            int lower_count = count_less(left_bound);
+            //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";
+            return upper_count - lower_count;
+        }
     };
-}
+};

@@ -16,8 +16,15 @@ add_link_options(
     $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
 )
 
+find_package(GTest REQUIRED)
+
+add_library(avl_lib INTERFACE)
+target_include_directories(avl_lib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/avl)
+
+enable_testing()
 add_subdirectory(avl)
 add_subdirectory(set)
 add_subdirectory(benchmark)
+add_subdirectory(tests/unit)
 
 

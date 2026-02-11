@@ -29,7 +29,7 @@ namespace Tree {
 
         AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept { 
             if (&other == this) return *this;
-            delete_tree(root_);
+            delete_tree();
             root_       = other.root_;
             other.root_ = nullptr;
             return *this;
@@ -37,9 +37,9 @@ namespace Tree {
 
         AvlTree<KeyT>& operator=(const AvlTree<KeyT>& other) { 
             if (this == &other) return *this;
-
-            delete_tree();
-            root_ = copy_tree(other);
+            AvlTree<KeyT> tmp;
+            tmp.root_ = copy_tree(other);
+            std::swap(root_, tmp.root_);
             return *this;
         }
 
@@ -87,9 +87,10 @@ namespace Tree {
             return node ? node->subtree_size_ : 0;
         }
         Node* copy_tree(const AvlTree& other) const {
+            if (!other.root_) return 0;
             std::stack<std::pair<Node*, Node*>> stack;
 
-            Node* new_root = new Node(other.root_->key);
+            Node* new_root = new Node(other.root_->key_);
             new_root->height_ = other.root_->height_;
             new_root->subtree_size_ = other.root_->subtree_size_;
 
@@ -102,21 +103,21 @@ namespace Tree {
                 stack.pop();
 
                 if (old_node->left_) {
-                    new_node->left_ = new Node(old_node->left_->key, new_node);
-                    new_node->height_ = old_node->left_->height;
-                    new_node->subtree_size_ = old_node->left_->subtree_size_;
+                    new_node->left_                = new Node(old_node->left_->key_, new_node);
+                    new_node->left_->height_       = old_node->left_->height_;
+                    new_node->left_->subtree_size_ = old_node->left_->subtree_size_;
                     stack.push({old_node->left_, new_node->left_});
                 }
                 if (old_node->right_) {
-                    new_node->right_ = new Node(old_node->left_->key, new_node);
-                    new_node->height_ = old_node->right_->height;
-                    new_node->subtree_size_ = old_node->right_->subtree_size_;
+                    new_node->right_                = new Node(old_node->right_->key_, new_node);
+                    new_node->right_->height_       = old_node->right_->height_;
+                    new_node->right_->subtree_size_ = old_node->right_->subtree_size_;
                     stack.push({old_node->right_, new_node->right_});
                 }
             }
             return new_root;
         }
-        void delete_tree() {
+        void delete_tree() noexcept {
             Node* current_node = root_;
             while (current_node) {
                 if (current_node->left_)  {

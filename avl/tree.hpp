@@ -10,27 +10,24 @@ namespace Tree {
     static constexpr int SELF_COUNT = 1;
         struct Node {
             KeyT   key_;
-            Node*  left_;
-            Node*  right_;
-            Node*  parent_;
-            int    height_;
-            int    subtree_size_;
-            Node(const KeyT& key, Node* left = nullptr, Node* right = nullptr, Node* parent = nullptr, int height = 0, int subtree_size = SELF_COUNT) :
-            key_(key), left_(left), right_(right), parent_(parent), height_(height), subtree_size_(subtree_size) {}
+            Node*  left_   = nullptr;
+            Node*  right_  = nullptr;
+            Node*  parent_ = nullptr;
+            int    height_ = 0;
+            int    subtree_size_ = SELF_COUNT;
+            Node(const KeyT& key, Node* parent = nullptr) :
+            key_(key), parent_(parent) {}
         };
     public:
         Node* root_;
-        AvlTree() : root_(nullptr) {} //constructor
+        AvlTree() : root_(nullptr) {} 
+        AvlTree(const AvlTree<KeyT>& other) : root_(copy_tree(other)) {}
 
-        AvlTree(const AvlTree<KeyT>& other) { //copy constructor
-            root_ = copy_tree(other);
-        }
-
-        AvlTree(AvlTree<KeyT>&& other) noexcept : root_(other.root_) { //move constructor
+        AvlTree(AvlTree<KeyT>&& other) noexcept : root_(other.root_) { 
             other.root_ = nullptr;
         }
 
-        AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept { //move assigment
+        AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept { 
             if (&other == this) return *this;
             delete_tree(root_);
             root_       = other.root_;
@@ -38,7 +35,7 @@ namespace Tree {
             return *this;
         }
 
-        AvlTree<KeyT>& operator=(const AvlTree<KeyT>& other) { //copy assigment
+        AvlTree<KeyT>& operator=(const AvlTree<KeyT>& other) { 
             if (this == &other) return *this;
 
             delete_tree();
@@ -46,11 +43,11 @@ namespace Tree {
             return *this;
         }
 
-        ~AvlTree() { // destructor
+        ~AvlTree() { 
             delete_tree();
         }
 
-        void insert(const KeyT& key) {
+        void insert(const KeyT& key) { 
             Node* current_node = root_;
             Node* parent       = nullptr;
             while (current_node) {
@@ -64,7 +61,7 @@ namespace Tree {
                 }
             }
 
-            Node* new_node = new Node(key, nullptr, nullptr, nullptr, 0, SELF_COUNT);
+            Node* new_node = new Node(key);
             if(root_ == nullptr) {
                 root_ = new_node;
                 return;
@@ -76,28 +73,26 @@ namespace Tree {
             } else {
                 parent->right_ = new_node;
             }
-            //std::cout << "insert" << key << "\n";
-            //std::cout << "INFO insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
 
             fix_size(parent);
             Node* unbalanced_node = fix_height(parent);
             if(unbalanced_node) unbalanced_node = balance_tree(unbalanced_node);
-            //std::cout << "INFO after fix insert node: " << key << "parent: " << parent->key_ << " root size: " << size(root_) << "\n";
         }
         
     private:
-
-        int height(Node* node) {
+        int height(const Node* node) const {
             return node ? node->height_ : 0;
         }
-        int size(Node* node) {
-            //if (!node) std::cout << "node is nullptr\n";
+        int size(const Node* node) const {
             return node ? node->subtree_size_ : 0;
         }
-        Node* copy_tree(const AvlTree& other) {
+        Node* copy_tree(const AvlTree& other) const {
             std::stack<std::pair<Node*, Node*>> stack;
 
-            Node* new_root = new Node(other.root_->key, nullptr, nullptr, other.root_->parent, other.root_->height, other.root_->subtree_size_);
+            Node* new_root = new Node(other.root_->key);
+            new_root->height_ = other.root_->height_;
+            new_root->subtree_size_ = other.root_->subtree_size_;
+
             Node* old_node = other.root_;
 
             stack.push({old_node, new_root});
@@ -107,11 +102,15 @@ namespace Tree {
                 stack.pop();
 
                 if (old_node->left_) {
-                    new_node->left_ = new Node(old_node->left_->key, nullptr, nullptr, new_node, old_node->left_->height, old_node->left_->subtree_size_);
+                    new_node->left_ = new Node(old_node->left_->key, new_node);
+                    new_node->height_ = old_node->left_->height;
+                    new_node->subtree_size_ = old_node->left_->subtree_size_;
                     stack.push({old_node->left_, new_node->left_});
                 }
                 if (old_node->right_) {
-                    new_node->right_ = new Node(old_node->right_->key, nullptr, nullptr, new_node, old_node->right_->height, old_node->right_->subtree_size_);
+                    new_node->right_ = new Node(old_node->left_->key, new_node);
+                    new_node->height_ = old_node->right_->height;
+                    new_node->subtree_size_ = old_node->right_->subtree_size_;
                     stack.push({old_node->right_, new_node->right_});
                 }
             }
@@ -244,7 +243,7 @@ namespace Tree {
 
         private:
         template <typename Comparator>
-        Node* find_bound(KeyT& key, Comparator comp) {
+        Node* find_bound(const KeyT& key, Comparator comp) const {
             Node* current_node = root_;
             Node* best_node    = nullptr;
             while(current_node) {
@@ -258,30 +257,26 @@ namespace Tree {
             return best_node;
         }
 
-        Node* upper_bound(KeyT& key) {
+        Node* upper_bound(const KeyT& key) const {
         return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
             return key1 > key2;
         });   
         }
 
-        Node* lower_bound(KeyT& key) {
+        Node* lower_bound(const KeyT& key) const {
         return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
             return key1 >= key2;
         }); 
         }
         
-        int count_less(Node* node) {
-            //std::cout << "root size: " << size(root_) << "\n";
+        int count_less(const Node* node) const { 
             if (!node) return size(root_);
             Node* current_node = root_;
             KeyT key = node->key_;
             int count = 0;
             while(current_node) {
-                //std::cout << "key: " << key << "current key: " << current_node->key_ << "\n";
                 if(key > current_node->key_) {
-                    //std::cout << "size currrent node: " << size(current_node->left_);
                     count += size(current_node->left_) + SELF_COUNT;
-                    //std::cout << "count = " << count << "\n";
                     current_node = current_node->right_;
                 } else {
                     current_node = current_node->left_;
@@ -291,15 +286,12 @@ namespace Tree {
         }
 
     public:
-        int range_required(KeyT& left, KeyT& right) {
+        int range_required(const KeyT& left, const KeyT& right) const {
             if (right < left) return 0;
             Node* left_bound  = lower_bound(left);
             Node* right_bound = upper_bound(right);
-            //(!left_bound) ? std::cout << "left null\n" : std::cout << "left " << left_bound->key_ << "\n";
-            //(!right_bound) ? std::cout << "right null\n" : std::cout << "right " << right_bound->key_ << "\n";
             int upper_count = count_less(right_bound);
             int lower_count = count_less(left_bound);
-            //std::cout << "upper: " << upper_count << " lower: " << lower_count <<"\n";
             return upper_count - lower_count;
         }
     };

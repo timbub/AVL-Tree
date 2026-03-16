@@ -251,12 +251,11 @@ namespace Tree {
         }
 
         private:
-        template <typename Comparator>
-        Node* find_bound(const KeyT& key, Comparator comp) const {
+        Node* upper_bound(const KeyT& key) const {
             Node* current_node = root_;
             Node* best_node    = nullptr;
             while(current_node) {
-                if (comp(current_node->key_,key)) {
+                if (current_node->key_ > key) {
                     best_node    = current_node;
                     current_node = current_node->left_;
                 } else {
@@ -266,16 +265,18 @@ namespace Tree {
             return best_node;
         }
 
-        Node* upper_bound(const KeyT& key) const {
-        return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
-            return key1 > key2;
-        });
-        }
-
         Node* lower_bound(const KeyT& key) const {
-        return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
-            return key1 >= key2;
-        });
+            Node* current_node = root_;
+            Node* best_node    = nullptr;
+            while(current_node) {
+                if (current_node->key_ >= key) {
+                    best_node    = current_node;
+                    current_node = current_node->left_;
+                } else {
+                    current_node = current_node->right_;
+                }
+            }
+            return best_node;
         }
 
         int count_less(const Node* node) const {

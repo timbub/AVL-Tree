@@ -6,6 +6,5 @@ Makefile
 *.mk
 *.o
 *.
-*.out
 Testing/
 .DS_Store

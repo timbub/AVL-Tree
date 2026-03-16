@@ -7,6 +7,7 @@
 namespace Tree {
     template <typename KeyT>
     class AvlTree {
+    private:
     static constexpr int SELF_COUNT = 1;
         struct Node {
             KeyT   key_;
@@ -18,24 +19,25 @@ namespace Tree {
             Node(const KeyT& key, Node* parent = nullptr) :
             key_(key), parent_(parent) {}
         };
-    public:
+
         Node* root_;
-        AvlTree() : root_(nullptr) {} 
+    public:
+        AvlTree() : root_(nullptr) {}
         AvlTree(const AvlTree<KeyT>& other) : root_(copy_tree(other)) {}
 
-        AvlTree(AvlTree<KeyT>&& other) noexcept : root_(other.root_) { 
+        AvlTree(AvlTree<KeyT>&& other) noexcept : root_(other.root_) {
             other.root_ = nullptr;
         }
 
-        AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept { 
+        AvlTree<KeyT>& operator=(AvlTree<KeyT>&& other) noexcept {
             if (&other == this) return *this;
-            delete_tree();
+            delete_tree(root_);
             root_       = other.root_;
             other.root_ = nullptr;
             return *this;
         }
 
-        AvlTree<KeyT>& operator=(const AvlTree<KeyT>& other) { 
+        AvlTree<KeyT>& operator=(const AvlTree<KeyT>& other) {
             if (this == &other) return *this;
             AvlTree<KeyT> tmp;
             tmp.root_ = copy_tree(other);
@@ -43,11 +45,11 @@ namespace Tree {
             return *this;
         }
 
-        ~AvlTree() { 
-            delete_tree();
+        ~AvlTree() {
+            delete_tree(root_);
         }
 
-        void insert(const KeyT& key) { 
+        void insert(const KeyT& key) {
             Node* current_node = root_;
             Node* parent       = nullptr;
             while (current_node) {
@@ -78,7 +80,7 @@ namespace Tree {
             Node* unbalanced_node = fix_height(parent);
             if(unbalanced_node) unbalanced_node = balance_tree(unbalanced_node);
         }
-        
+
     private:
         int height(const Node* node) const {
             return node ? node->height_ : 0;
@@ -96,29 +98,35 @@ namespace Tree {
 
             Node* old_node = other.root_;
 
-            stack.push({old_node, new_root});
-            while (!stack.empty()) {
+            try {
+                stack.push({old_node, new_root});
+                while (!stack.empty()) {
 
-                auto [old_node, new_node] = stack.top();
-                stack.pop();
+                    auto [old_node, new_node] = stack.top();
+                    stack.pop();
 
-                if (old_node->left_) {
-                    new_node->left_                = new Node(old_node->left_->key_, new_node);
-                    new_node->left_->height_       = old_node->left_->height_;
-                    new_node->left_->subtree_size_ = old_node->left_->subtree_size_;
-                    stack.push({old_node->left_, new_node->left_});
+                    if (old_node->left_) {
+                        new_node->left_                = new Node(old_node->left_->key_, new_node);
+                        new_node->left_->height_       = old_node->left_->height_;
+                        new_node->left_->subtree_size_ = old_node->left_->subtree_size_;
+                        stack.push({old_node->left_, new_node->left_});
+                    }
+                    if (old_node->right_) {
+                        new_node->right_                = new Node(old_node->right_->key_, new_node);
+                        new_node->right_->height_       = old_node->right_->height_;
+                        new_node->right_->subtree_size_ = old_node->right_->subtree_size_;
+                        stack.push({old_node->right_, new_node->right_});
+                    }
                 }
-                if (old_node->right_) {
-                    new_node->right_                = new Node(old_node->right_->key_, new_node);
-                    new_node->right_->height_       = old_node->right_->height_;
-                    new_node->right_->subtree_size_ = old_node->right_->subtree_size_;
-                    stack.push({old_node->right_, new_node->right_});
-                }
+            }
+            catch(...) {
+                delete_tree(new_root);
+                throw;
             }
             return new_root;
         }
-        void delete_tree() noexcept {
-            Node* current_node = root_;
+        void delete_tree(Node* root) const noexcept {
+            Node* current_node = root;
             while (current_node) {
                 if (current_node->left_)  {
                     current_node = current_node->left_;
@@ -131,7 +139,7 @@ namespace Tree {
                     } else if (parent && current_node == parent->right_) {
                         parent->right_ = nullptr;
                     }
-                    if (current_node == root_) {
+                    if (current_node == root) {
                         delete current_node;
                         break;
                     }
@@ -261,16 +269,16 @@ namespace Tree {
         Node* upper_bound(const KeyT& key) const {
         return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
             return key1 > key2;
-        });   
+        });
         }
 
         Node* lower_bound(const KeyT& key) const {
         return find_bound(key, [](const KeyT& key1, const KeyT& key2) {
             return key1 >= key2;
-        }); 
+        });
         }
-        
-        int count_less(const Node* node) const { 
+
+        int count_less(const Node* node) const {
             if (!node) return size(root_);
             Node* current_node = root_;
             KeyT key = node->key_;

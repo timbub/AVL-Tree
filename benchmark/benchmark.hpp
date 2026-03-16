@@ -20,8 +20,8 @@ namespace benchmark {
         return tree.range_required(first, second);
     }
 
-    template <typename KeyT, typename SetTree>
-    size_t perform_query(SetTree& tree, KeyT left, KeyT right) {
+    template <typename KeyT>
+    size_t perform_query(std::set<KeyT>& tree, KeyT left, KeyT right) {
         if (left > right) return 0;
         auto left_bound  = tree.lower_bound(left);
         auto right_bound = tree.upper_bound(right);
